@@ -1,0 +1,131 @@
+<div class="container py-4">
+  <!-- Dynamic Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h2 class="fw-bold mb-1 text-white">
+        <i class="fab fa-whatsapp text-success me-2"></i>Conexão WhatsApp & Evolution Manager
+      </h2>
+      <p class="text-white mb-0">
+        Gerencie a instância do WhatsApp e visualize o estado da conexão em tempo real.
+      </p>
+    </div>
+    <div>
+      <button
+        type="button"
+        class="btn btn-outline-light btn-sm"
+        (click)="carregarStatus()"
+        [disabled]="carregando()"
+      >
+        <i class="fas fa-sync-alt me-1" [class.fa-spin]="carregando()"></i>Atualizar Status
+      </button>
+    </div>
+  </div>
+
+  @if (mensagemAcao()) {
+    <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
+      <i class="fas fa-info-circle me-2 fs-5"></i>
+      <div>{{ mensagemAcao() }}</div>
+    </div>
+  }
+
+  <div class="row g-4">
+    <!-- Card de Status da Instância -->
+    <div class="col-lg-6">
+      <div class="card tm-card p-4 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h5 class="fw-bold text-white mb-0">
+            <i class="fas fa-server text-primary me-2"></i>Status da Instância
+          </h5>
+          @if (statusConexao(); as st) {
+            <span class="badge px-3 py-2" [class]="st.conectado ? 'tm-badge-success' : 'tm-badge-danger'">
+              <i class="fas" [class]="st.conectado ? 'fa-check-circle me-1' : 'fa-times-circle me-1'"></i>
+              {{ st.conectado ? 'CONECTADO' : 'DESCONECTADO' }}
+            </span>
+          }
+        </div>
+
+        @if (statusConexao(); as status) {
+          <div class="bg-dark p-3 rounded border border-secondary mb-4">
+            <div class="row g-3">
+              <div class="col-6">
+                <div class="text-secondary small">Instância Ativa</div>
+                <div class="fw-bold text-white">{{ status.instancia }}</div>
+              </div>
+              <div class="col-6">
+                <div class="text-secondary small">Estado Bruto</div>
+                <div class="fw-bold text-warning text-uppercase">{{ status.estado }}</div>
+              </div>
+              <div class="col-12 mt-2">
+                <div class="text-secondary small">Mensagem do Sistema</div>
+                <div class="text-light small mt-1">{{ status.mensagem }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ações Principais de Conexão -->
+          <div class="d-grid gap-2">
+            @if (!status.conectado) {
+              <button
+                type="button"
+                class="btn btn-success btn-lg fw-bold d-flex align-items-center justify-content-center py-3"
+                (click)="gerarQrCode()"
+                [disabled]="carregandoQrCode()"
+              >
+                @if (carregandoQrCode()) {
+                  <i class="fas fa-spinner fa-spin me-2"></i>Gerando QR Code...
+                } @else {
+                  <i class="fas fa-qrcode me-2"></i>Conectar WhatsApp (Gerar QR Code)
+                }
+              </button>
+            } @else {
+              <button
+                type="button"
+                class="btn btn-outline-danger btn-lg fw-bold d-flex align-items-center justify-content-center py-3"
+                (click)="desconectar()"
+                [disabled]="carregando()"
+              >
+                <i class="fas fa-sign-out-alt me-2"></i>Desconectar Sessão do WhatsApp
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Área de Exibição do QR Code -->
+    <div class="col-lg-6">
+      <div class="card tm-card p-4 h-100 d-flex flex-column align-items-center justify-content-center text-center">
+        <h5 class="fw-bold text-white mb-3">
+          <i class="fas fa-mobile-alt text-primary me-2"></i>Escaneie com seu Celular
+        </h5>
+
+        @if (qrCode(); as qr) {
+          @if (qr.base64) {
+            <div class="p-3 bg-white rounded shadow-sm mb-3">
+              <img [src]="qr.base64" alt="QR Code WhatsApp" class="tm-qrcode-img img-fluid" />
+            </div>
+            <p class="text-secondary small mb-0">
+              Abra o WhatsApp no celular &gt; Aparelhos conectados &gt; Conectar um aparelho.
+            </p>
+          } @else if (qr.code) {
+            <div class="p-3 bg-dark text-warning border border-warning rounded mb-3 text-break">
+              <code>{{ qr.code }}</code>
+            </div>
+            <p class="text-secondary small mb-0">Utilize o código acima na Evolution API.</p>
+          } @else {
+            <div class="alert alert-warning mb-0">
+              {{ qr.mensagem || 'QR Code não disponível.' }}
+            </div>
+          }
+        } @else {
+          <div class="py-5 text-secondary">
+            <i class="fas fa-qrcode fs-1 d-block mb-3 text-muted"></i>
+            <p class="mb-0">
+              Se a instância estiver desconectada, clique em "Conectar WhatsApp" para carregar o QR Code aqui.
+            </p>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

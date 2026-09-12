@@ -1,0 +1,73 @@
+<div class="landing-container d-flex flex-column min-vh-100 bg-dark text-white">
+  <!-- Hero Main Content -->
+  <main class="flex-grow-1 d-flex align-items-center justify-content-center py-5">
+    <div class="container text-center">
+      <div class="mb-5 animate-fade-in">
+        <h1 class="display-4 fw-bold text-white mb-3">TechMinds Hub</h1>
+        <p class="lead text-white opacity-90 mx-auto" style="max-width: 600px;">
+          Selecione o módulo abaixo para acessar a plataforma.
+        </p>
+      </div>
+
+      <!-- Modules Grid -->
+      <div class="row justify-content-center g-4 mt-2">
+        <!-- Comercial Module Card -->
+        <div class="col-md-6 col-lg-5">
+          <div
+            class="module-card card tm-card p-4 h-100 text-start cursor-pointer transition-all border border-secondary shadow-lg"
+            (click)="irParaLogin()"
+            role="button"
+            tabindex="0"
+          >
+            <div class="d-flex align-items-center justify-content-between mb-4">
+              <div class="icon-circle rounded-3 p-3 d-flex align-items-center justify-content-center">
+                <i class="fas fa-briefcase fs-2 text-primary"></i>
+              </div>
+              <span class="badge bg-primary text-white px-3 py-2 fw-semibold fs-6">Acessar</span>
+            </div>
+
+            <h3 class="fw-bold text-white mb-2">Comercial</h3>
+            <p class="text-white opacity-85 small mb-4">
+              Acesse a gestão de estabelecimentos, disparos de mensagens WhatsApp anti-ban via Evolution API v2 e modelos de mensagem.
+            </p>
+
+            <div class="mt-auto d-flex align-items-center text-primary fw-bold fs-6">
+              <span>Entrar no Módulo Comercial</span>
+              <i class="fas fa-arrow-right ms-2 transition-arrow"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Groom Module Card -->
+        <div class="col-md-6 col-lg-5">
+          <div
+            class="module-card card tm-card p-4 h-100 text-start cursor-pointer transition-all border border-secondary shadow-lg"
+            (click)="irParaGroom()"
+            role="button"
+            tabindex="0"
+          >
+            <div class="d-flex align-items-center justify-content-between mb-4">
+              <div class="icon-circle rounded-3 p-3 d-flex align-items-center justify-content-center">
+                <i class="fas fa-cut fs-2 text-primary"></i>
+              </div>
+              <span class="badge bg-primary text-white px-3 py-2 fw-semibold fs-6">Acessar</span>
+            </div>
+
+            <h3 class="fw-bold text-white mb-2">Groom</h3>
+            <p class="text-white opacity-85 small mb-4">
+              Acesse a plataforma Groom para gestão de agendamentos, clientes, serviços e planos de estabelecimentos.
+            </p>
+
+            <div class="mt-auto d-flex align-items-center text-primary fw-bold fs-6">
+              <span>Entrar no Módulo Groom</span>
+              <i class="fas fa-external-link-alt ms-2 transition-arrow"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Global Footer -->
+  <app-footer></app-footer>
+</div>
