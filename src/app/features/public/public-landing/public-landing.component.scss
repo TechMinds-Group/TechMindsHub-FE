@@ -1,0 +1,48 @@
+:host {
+  display: block;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.landing-container {
+  background-color: #0f172a !important;
+}
+
+.border-theme {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.logo-icon {
+  color: var(--bs-primary) !important;
+}
+
+.module-card {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  border-radius: 16px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+
+  &:hover {
+    transform: translateY(-6px);
+    border-color: var(--bs-primary) !important;
+    box-shadow: 0 12px 30px rgba(13, 110, 253, 0.3) !important;
+
+    .transition-arrow {
+      transform: translateX(6px);
+    }
+  }
+}
+
+.icon-circle {
+  width: 56px;
+  height: 56px;
+  background-color: rgba(13, 110, 253, 0.15) !important;
+}
+
+.transition-arrow {
+  transition: transform 0.2s ease;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}

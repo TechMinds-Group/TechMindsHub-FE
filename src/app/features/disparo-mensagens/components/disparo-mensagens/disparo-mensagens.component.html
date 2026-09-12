@@ -1,0 +1,563 @@
+<div class="container py-4">
+  <!-- Top Banner Header -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+      <h2 class="fw-bold mb-1 text-white">
+        <i class="fas fa-paper-plane text-primary me-2"></i>TechMinds Hub — Disparos Ativos Anti-Ban
+      </h2>
+      <p class="text-white mb-0">
+        Gerenciador de mensagens via Evolution API v2 com intervalador inteligente, banco de dados e acompanhamento ao vivo.
+      </p>
+    </div>
+    <div>
+      <span class="badge px-3 py-2" [class]="hubService.conectado() ? 'tm-badge-success' : 'tm-badge-danger'">
+        <i class="fas" [class]="hubService.conectado() ? 'fa-signal me-1' : 'fa-exclamation-triangle me-1'"></i>
+        {{ hubService.conectado() ? 'SignalR Conectado' : 'SignalR Desconectado' }}
+      </span>
+    </div>
+  </div>
+
+  @if (erroEnvio()) {
+    <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+      <i class="fas fa-exclamation-circle me-2 fs-5"></i>
+      <div>{{ erroEnvio() }}</div>
+    </div>
+  }
+
+  <!-- Banner de Confirmação do Resultado da Importação do Banco de Dados -->
+  @if (relatorioImportacao(); as relatorio) {
+    <div class="alert alert-success alert-dismissible fade show p-3 mb-4 rounded border border-success bg-dark" role="alert">
+      <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+          <i class="fas fa-check-circle text-success fs-3 me-3"></i>
+          <div>
+            <h6 class="fw-bold text-white mb-1">Importação de Planilha Concluída com Sucesso!</h6>
+            <div class="text-light small">
+              <span class="badge bg-success me-2">+{{ relatorio.novoscadastrados }} novos salvos no banco</span>
+              @if (relatorio.duplicadosIgnorados > 0) {
+                <span class="badge bg-secondary me-2">{{ relatorio.duplicadosIgnorados }} duplicados ignorados</span>
+              }
+              <span class="text-secondary">(Total lidos na planilha: {{ relatorio.totalRecebidos }})</span>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn-close btn-close-white" (click)="relatorioImportacao.set(null)" aria-label="Close"></button>
+      </div>
+    </div>
+  }
+
+  <div class="row g-4">
+    <!-- Configuração e Seleção de Disparo -->
+    <div class="col-lg-5">
+      <div class="card tm-card p-4 h-100">
+        <h5 class="fw-bold text-white mb-3">
+          <i class="fas fa-sliders-h text-primary me-2"></i>Configurações do Disparo
+        </h5>
+
+        <!-- Painel de Importação de Planilha CSV -->
+        <div class="mb-4 p-3 rounded bg-dark border border-secondary">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <label class="form-label text-light fw-medium mb-0">
+              <i class="fas fa-file-csv text-primary me-2"></i>Importar Planilha (.csv)
+            </label>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-secondary py-0 px-2"
+              (click)="togglePainelUpload()"
+              [disabled]="executando()"
+            >
+              <i class="fas" [class]="exibirPainelUpload() ? 'fa-chevron-up me-1' : 'fa-chevron-down me-1'"></i>
+              {{ exibirPainelUpload() ? 'Ocultar' : 'Expandir' }}
+            </button>
+          </div>
+
+          <input
+            #fileInput
+            type="file"
+            accept=".csv,.txt"
+            (change)="onFileSelected($event)"
+            class="d-none"
+          />
+
+          @if (exibirPainelUpload()) {
+            <button
+              type="button"
+              class="btn btn-outline-primary w-100 fw-bold py-2 d-flex align-items-center justify-content-center"
+              (click)="fileInput.click()"
+              [disabled]="executando() || importandoCSV()"
+            >
+              @if (importandoCSV()) {
+                <i class="fas fa-spinner fa-spin me-2"></i>Processando e Salvando no Banco...
+              } @else {
+                <i class="fas fa-upload me-2"></i>Selecionar Arquivo CSV
+              }
+            </button>
+
+            @if (importandoCSV()) {
+              <div class="mt-3">
+                <div class="progress bg-dark border border-secondary" style="height: 22px;">
+                  <div
+                    class="progress-bar progress-bar-striped progress-bar-animated bg-success fw-bold"
+                    role="progressbar"
+                    [style.width.%]="progressoImportacaoBanco()"
+                    [attr.aria-valuenow]="progressoImportacaoBanco()"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                  >
+                    {{ progressoImportacaoBanco() }}%
+                  </div>
+                </div>
+                <div class="small text-success text-center fw-bold mt-2">
+                  <i class="fas fa-database me-1"></i>{{ statusImportacaoTexto() }}
+                </div>
+              </div>
+            }
+
+            <div class="form-text text-secondary mt-1">
+              Colunas suportadas: NOME, TELEFONE, ENDEREÇO, SITE, TIPOS, NICHO, CIDADE.
+            </div>
+          } @else {
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-secondary small">Painel de upload oculto</span>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-primary fw-bold"
+                (click)="fileInput.click()"
+                [disabled]="executando()"
+              >
+                <i class="fas fa-plus me-1"></i>Importar Nova Planilha
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- Seletor de Quantidade de Estabelecimentos a Enviar -->
+        <div class="mb-3">
+          <label for="selectQuantidade" class="form-label text-light fw-medium">
+            <i class="fas fa-paper-plane text-primary me-2"></i>Quantidade de Estabelecimentos a Enviar
+          </label>
+          <select
+            id="selectQuantidade"
+            class="form-select form-select-lg bg-dark text-white border-secondary"
+            [ngModel]="quantidadeSelecionada()"
+            (ngModelChange)="alterarQuantidade($event)"
+            [disabled]="executando() || estabelecimentosBanco().length === 0"
+          >
+            @if (estabelecimentosBanco().length > 0) {
+              <option [value]="estabelecimentosBanco().length">
+                Todos do Banco ({{ estabelecimentosBanco().length }} Estabelecimentos)
+              </option>
+            }
+            @for (opcao of opcoesLote; track opcao) {
+              <option [value]="opcao">{{ opcao }} Estabelecimentos</option>
+            }
+          </select>
+          <div class="form-text text-secondary mt-1">
+            Selecione a quantidade de estabelecimentos do banco que receberão as mensagens neste disparo.
+          </div>
+        </div>
+
+        <!-- Checkbox de Filtro: Enviar Apenas Para Contatos NUNCA Enviados -->
+        <div class="p-3 mb-4 rounded bg-dark border border-secondary">
+          <div class="form-check form-switch d-flex align-items-center justify-content-between mb-0 ps-0">
+            <div>
+              <label class="form-check-label text-white fw-bold cursor-pointer" for="checkApenasNaoEnviados">
+                <i class="fas fa-user-shield text-warning me-2"></i>Enviar APENAS para números nunca contatados
+              </label>
+              <div class="small text-secondary mt-1">
+                Ignora automaticamente estabelecimentos que já receberam mensagem anteriormente.
+              </div>
+            </div>
+            <input
+              class="form-check-input fs-4 ms-3 cursor-pointer"
+              type="checkbox"
+              role="switch"
+              id="checkApenasNaoEnviados"
+              [ngModel]="apenasNaoEnviados()"
+              (ngModelChange)="apenasNaoEnviados.set($event)"
+              [disabled]="executando() || estabelecimentosBanco().length === 0"
+            />
+          </div>
+
+          @if (apenasNaoEnviados() && totalIgnoradosPorJaEnviados() > 0) {
+            <div class="mt-3 p-2 rounded bg-warning-subtle border border-warning text-warning small d-flex align-items-center">
+              <i class="fas fa-filter me-2 fs-6"></i>
+              <span>Filtro Ativo: <strong>{{ totalIgnoradosPorJaEnviados() }}</strong> contato(s) já enviados serão ignorados.</span>
+            </div>
+          }
+        </div>
+
+        <!-- Editor de 3 Templates da Mensagem (Persistência no Banco de Dados) -->
+        <div class="mb-4 p-3 rounded bg-dark border border-secondary shadow-sm">
+          <div class="d-flex align-items-center justify-content-between mb-3 border-bottom border-secondary pb-2">
+            <div class="d-flex align-items-center">
+              <i class="fas fa-save text-success me-2 fs-5"></i>
+              <div>
+                <h6 class="text-light fw-bold mb-0">Templates de Mensagem</h6>
+                <small class="text-secondary">Persistidos no banco de dados</small>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="btn btn-sm btn-success fw-bold d-flex align-items-center"
+              (click)="salvarTemplatesNoBanco()"
+              [disabled]="executando() || salvandoTemplates()"
+            >
+              @if (salvandoTemplates()) {
+                <i class="fas fa-spinner fa-spin me-1"></i>Salvando...
+              } @else {
+                <i class="fas fa-floppy-disk me-1"></i>Salvar Templates
+              }
+            </button>
+          </div>
+
+          @if (mensagemSucessoTemplates()) {
+            <div class="alert alert-success py-2 px-3 small mb-3 border-0 bg-success-subtle text-success fw-bold d-flex align-items-center">
+              <i class="fas fa-check-circle me-2 fs-6"></i>
+              <span>{{ mensagemSucessoTemplates() }}</span>
+            </div>
+          }
+
+          @if (mensagemErroTemplates()) {
+            <div class="alert alert-danger py-2 px-3 small mb-3 border-0 bg-danger-subtle text-danger fw-bold d-flex align-items-center">
+              <i class="fas fa-exclamation-triangle me-2 fs-6"></i>
+              <span>{{ mensagemErroTemplates() }}</span>
+            </div>
+          }
+
+          <!-- Template 1 -->
+          <div class="mb-3">
+            <label for="inputTemplate1" class="form-label text-secondary small mb-1 fw-bold">
+              Template #1 (Variante A)
+            </label>
+            <textarea
+              id="inputTemplate1"
+              class="form-control bg-dark text-white border-secondary"
+              rows="2"
+              [ngModel]="mensagemTemplate1()"
+              (ngModelChange)="mensagemTemplate1.set($event)"
+              [disabled]="executando()"
+              placeholder="Ex: Olá {nome}, tudo bem?"
+            ></textarea>
+          </div>
+
+          <!-- Template 2 -->
+          <div class="mb-3">
+            <label for="inputTemplate2" class="form-label text-secondary small mb-1 fw-bold">
+              Template #2 (Variante B)
+            </label>
+            <textarea
+              id="inputTemplate2"
+              class="form-control bg-dark text-white border-secondary"
+              rows="2"
+              [ngModel]="mensagemTemplate2()"
+              (ngModelChange)="mensagemTemplate2.set($event)"
+              [disabled]="executando()"
+              placeholder="Ex: Oi {nome}! Como vai?"
+            ></textarea>
+          </div>
+
+          <!-- Template 3 -->
+          <div class="mb-3">
+            <label for="inputTemplate3" class="form-label text-secondary small mb-1 fw-bold">
+              Template #3 (Variante C)
+            </label>
+            <textarea
+              id="inputTemplate3"
+              class="form-control bg-dark text-white border-secondary"
+              rows="2"
+              [ngModel]="mensagemTemplate3()"
+              (ngModelChange)="mensagemTemplate3.set($event)"
+              [disabled]="executando()"
+              placeholder="Ex: Prezado(a) {nome}, tudo ótimo?"
+            ></textarea>
+          </div>
+
+          <div class="form-text text-secondary mt-1 small">
+            <i class="fas fa-shield-alt text-primary me-1"></i>
+            Cada contato receberá aleatoriamente uma das 3 variações acima. Use <code>&#123;nome&#125;</code> para dinamizar.
+          </div>
+        </div>
+
+        <!-- Botão Disparar em Lote -->
+        <div class="mt-auto">
+          <button
+            type="button"
+            class="btn btn-primary btn-lg w-100 fw-bold d-flex align-items-center justify-content-center py-3"
+            (click)="dispararMensagens()"
+            [disabled]="executando() || estabelecimentosBanco().length === 0"
+          >
+            @if (executando()) {
+              <i class="fas fa-spinner fa-spin me-2"></i>Disparando Mensagens (Aguarde)...
+            } @else {
+              <i class="fas fa-paper-plane me-2"></i>Enviar para {{ contatosSelecionados().length }} Estabelecimentos
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de Contatos do Banco de Dados -->
+    <div class="col-lg-7">
+      <div class="card tm-card p-4 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h5 class="fw-bold text-white mb-0 d-inline-block me-2">
+              <i class="fas fa-database text-primary me-2"></i>Estabelecimentos no Banco ({{ estabelecimentosBanco().length }})
+            </h5>
+            <span class="badge tm-badge-info">
+              <i class="fas fa-paper-plane me-1"></i>A Enviar: {{ contatosSelecionados().length }}
+            </span>
+          </div>
+
+          <div class="d-flex align-items-center">
+            @if (estabelecimentosBanco().length > 0) {
+              <button
+                type="button"
+                class="btn btn-outline-danger btn-sm me-2 py-1 px-2"
+                (click)="limparBancoDeDados()"
+                [disabled]="executando()"
+                title="Limpar todos os registros do banco"
+              >
+                <i class="fas fa-trash me-1"></i>Limpar Banco
+              </button>
+            }
+            <span class="badge tm-badge-info">
+              Delay Anti-Ban: 30s - 60s
+            </span>
+          </div>
+        </div>
+
+        @if (estabelecimentosBanco().length === 0) {
+          <!-- Estado Vazio Sem Dados no Banco -->
+          <div class="text-center py-5 my-auto">
+            <i class="fas fa-database text-secondary display-3 mb-3 d-block"></i>
+            <h5 class="fw-bold text-white mb-2">Nenhum Estabelecimento Cadastrado</h5>
+            <p class="text-secondary mb-4 mx-auto" style="max-width: 420px;">
+              Sua base de dados está vazia. Clique em <strong>"Selecionar Arquivo CSV"</strong> para importar sua lista de estabelecimentos e números.
+            </p>
+            <button
+              type="button"
+              class="btn btn-primary fw-bold px-4 py-2"
+              (click)="fileInput.click()"
+            >
+              <i class="fas fa-upload me-2"></i>Importar Planilha CSV
+            </button>
+          </div>
+        } @else {
+          <!-- Tabela de Estabelecimentos do Banco de Dados -->
+          <div class="table-responsive tm-table-scroll pe-1">
+            <table class="table table-dark table-hover align-middle mb-0">
+              <thead>
+                <tr class="text-secondary border-secondary">
+                  <th scope="col">#</th>
+                  <th scope="col">Estabelecimento / Empresa</th>
+                  <th scope="col">Telefone Sanitizado</th>
+                  <th scope="col" class="text-center">WhatsApp</th>
+                  <th scope="col" class="text-center">Status de Envio</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (contato of estabelecimentosBanco(); track $index) {
+                  <tr class="border-secondary">
+                    <td class="text-secondary fw-bold">{{ $index + 1 }}</td>
+                    <td class="fw-medium text-white">
+                      <i class="fas fa-store me-2" [class]="isContatoAlvo(contato) ? 'text-primary' : 'text-secondary'"></i>
+                      {{ contato.nome }}
+                      @if (isContatoAlvo(contato)) {
+                        <span class="badge bg-primary-subtle text-primary border border-primary ms-2 py-0 px-2 small">Alvo</span>
+                      }
+                    </td>
+                    <td class="text-light">
+                      <code>{{ helper.formatarTelefone(contato.numero) }}</code>
+                    </td>
+                    <td class="text-center">
+                      @if (contato.temWhatsApp !== false) {
+                        <span class="badge bg-success-subtle text-success border border-success py-1 px-2" title="Possui conta ativa no WhatsApp">
+                          <i class="fab fa-whatsapp me-1 text-success fs-6"></i>Conta Ativa
+                        </span>
+                      } @else {
+                        <span class="badge bg-secondary-subtle text-secondary border border-secondary py-1 px-2" title="Sem conta no WhatsApp">
+                          <i class="fas fa-ban me-1 text-muted"></i>Sem WhatsApp
+                        </span>
+                      }
+                    </td>
+                    <td class="text-center">
+                      @switch (obterStatusEnvio(contato)) {
+                        @case ('sucesso') {
+                          <span class="badge tm-badge-success py-1 px-2" title="Mensagem enviada com sucesso no banco de dados">
+                            <i class="fas fa-check-circle me-1"></i>Enviado
+                          </span>
+                        }
+                        @case ('falha') {
+                          <span class="badge tm-badge-danger py-1 px-2" title="Falha ao disparar para este número">
+                            <i class="fas fa-times-circle me-1"></i>Falha
+                          </span>
+                        }
+                        @default {
+                          <span class="badge bg-dark text-secondary border border-secondary py-1 px-2" title="Mensagem ainda não enviada para este número">
+                            <i class="fas fa-clock me-1 text-muted"></i>Não Enviado
+                          </span>
+                        }
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Acompanhamento em Tempo Real (SignalR Feed) -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card tm-card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold text-white mb-0">
+            <i class="fas fa-broadcast-tower text-primary me-2"></i>Monitoramento de Envio em Tempo Real
+          </h5>
+
+          @if (hubService.progressoAtual(); as progresso) {
+            <span class="badge tm-badge-info fs-6">
+              Item {{ progresso.indiceAtual }} de {{ progresso.totalContatos }}
+            </span>
+          }
+        </div>
+
+        <!-- Barra de Progresso Visual -->
+        <div class="progress mb-4 bg-dark border border-secondary tm-progress-container">
+          <div
+            class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+            role="progressbar"
+            [style.width.%]="progressoPercentual()"
+            [attr.aria-valuenow]="progressoPercentual()"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
+            {{ progressoPercentual() }}%
+          </div>
+        </div>
+
+        <!-- Destaque do Item Atual Processado -->
+        @if (hubService.progressoAtual(); as atual) {
+          <div
+            class="p-3 mb-4 rounded bg-dark d-flex align-items-center justify-content-between border"
+            [class]="contagemRegressivaSegundos() > 0 ? 'border-warning' : 'border-primary'"
+          >
+            <div class="d-flex align-items-center">
+              @if (contagemRegressivaSegundos() > 0) {
+                <i class="fas fa-hourglass-half fa-spin text-warning fs-3 me-3"></i>
+              } @else if (executando()) {
+                <i class="fas fa-paper-plane fa-pulse text-primary fs-3 me-3"></i>
+              } @else {
+                <i class="fas fa-check-circle text-success fs-3 me-3"></i>
+              }
+              <div>
+                <div class="fw-bold text-white fs-6">
+                  Última mensagem enviada para: <span class="text-primary">{{ atual.nomeContato }}</span> ({{ helper.formatarTelefone(atual.numeroSanitizado) }})
+                </div>
+                <div class="text-secondary small mt-1">
+                  @if (contagemRegressivaSegundos() > 0) {
+                    <span class="text-warning fw-medium">
+                      <i class="fas fa-shield-alt me-1"></i>Pausa Anti-Ban ativa: próximo envio em <strong>{{ contagemRegressivaSegundos() }}s</strong>
+                    </span>
+                  } @else if (executando()) {
+                    <span class="text-info fw-medium">
+                      <i class="fas fa-spinner fa-spin me-1"></i>Enviando mensagem para o próximo contato...
+                    </span>
+                  } @else {
+                    <span>{{ atual.mensagemLog }}</span>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <div class="text-end ms-3">
+              @if (contagemRegressivaSegundos() > 0) {
+                <span class="badge bg-warning text-dark fs-6 py-2 px-3 shadow-sm border border-warning">
+                  <i class="fas fa-clock me-1 fa-spin"></i>Próximo envio em {{ contagemRegressivaSegundos() }}s
+                </span>
+              } @else if (executando()) {
+                <span class="badge bg-info text-dark fs-6 py-2 px-3 shadow-sm border border-info">
+                  <i class="fas fa-paper-plane fa-pulse me-1"></i>Enviando...
+                </span>
+              } @else {
+                <span class="badge tm-badge-success fs-6 py-2 px-3 shadow-sm border border-success">
+                  <i class="fas fa-check-circle me-1"></i>Finalizado
+                </span>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Relatório Consolidado Final -->
+        @if (relatorioConsolidado(); as relatorio) {
+          <div class="p-4 mb-4 rounded border border-success bg-dark">
+            <div class="d-flex align-items-center mb-3">
+              <i class="fas fa-check-circle text-success fs-3 me-3"></i>
+              <div>
+                <h6 class="fw-bold text-white mb-0">Disparo em Lote Finalizado com Sucesso!</h6>
+                <p class="text-secondary small mb-0">Resumo consolidado das mensagens processadas.</p>
+              </div>
+            </div>
+            <div class="row g-3 text-center">
+              <div class="col-md-4">
+                <div class="p-3 rounded bg-secondary-subtle">
+                  <div class="text-secondary small">Total Processado</div>
+                  <div class="fs-4 fw-bold text-white">{{ relatorio.total }}</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 rounded bg-success-subtle">
+                  <div class="text-success small">Enviados com Sucesso</div>
+                  <div class="fs-4 fw-bold text-success">{{ relatorio.enviadosSucesso }}</div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="p-3 rounded bg-danger-subtle">
+                  <div class="text-danger small">Falhas</div>
+                  <div class="fs-4 fw-bold text-danger">{{ relatorio.falhas }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Feed de Logs em Tempo Real -->
+        <h6 class="fw-bold text-white mb-2">
+          <i class="fas fa-list-alt text-secondary me-2"></i>Histórico de Eventos Transmitidos
+        </h6>
+        <div class="bg-dark rounded p-3 border border-secondary tm-log-feed">
+          @if (hubService.logs().length === 0) {
+            <div class="text-center text-secondary py-4">
+              <i class="fas fa-inbox fs-2 mb-2 d-block"></i>
+              Nenhum evento registrado ainda. Clique em "Enviar" para iniciar o acompanhamento.
+            </div>
+          } @else {
+            <ul class="list-group list-group-flush">
+              @for (log of hubService.logs(); track $index) {
+                <li class="list-group-item bg-transparent text-light border-secondary d-flex align-items-center justify-content-between px-0 py-2">
+                  <div class="d-flex align-items-center">
+                    <span class="badge me-3" [class]="helper.obterClasseBadge(log.sucesso)">
+                      <i class="fas" [class]="log.sucesso ? 'fa-check me-1' : 'fa-times me-1'"></i>
+                      {{ log.sucesso ? 'SUCESSO' : 'FALHA' }}
+                    </span>
+                    <div>
+                      <span class="fw-medium text-white">{{ log.mensagemLog }}</span>
+                    </div>
+                  </div>
+                  <div class="text-secondary small ms-2">
+                    {{ log.timestamp | date:'HH:mm:ss' }}
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

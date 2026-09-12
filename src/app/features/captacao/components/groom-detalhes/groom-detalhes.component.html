@@ -1,0 +1,188 @@
+<div class="container py-4">
+  <!-- Header: Voltar + Nome do Sistema + Subtítulo -->
+  <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3">
+    <div class="d-flex align-items-center gap-3">
+      <button
+        (click)="voltar()"
+        class="btn btn-outline-light rounded-circle p-0 d-flex align-items-center justify-content-center btn-voltar"
+        style="width: 42px; height: 42px;"
+        title="Voltar para Captação"
+      >
+        <i class="fas fa-arrow-left text-white"></i>
+      </button>
+
+      <div>
+        <h2 class="h4 mb-0 fw-bold text-white d-flex align-items-center gap-2">
+          <i [class]="sistemaIcone()" class="text-primary me-1"></i>{{ sistemaNome() }}
+        </h2>
+        <span class="text-white opacity-75 small">Detalhes do Sistema Integrado</span>
+      </div>
+    </div>
+
+    <div>
+      <button
+        (click)="acessarSistema()"
+        class="btn btn-primary px-4 py-2.5 shadow-sm fw-bold rounded-3 d-inline-flex align-items-center gap-2"
+      >
+        <i class="fas fa-external-link-alt"></i><span>Acessar {{ sistemaNome() }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Grid Principal (Informações Gerais do Sistema) -->
+  <div class="row g-4 mb-4">
+    <!-- Coluna Principal -->
+    <div class="col-xl-8 col-12">
+      <div class="card border-0 shadow-sm p-4 tm-card rounded-4">
+        <!-- Header do Perfil do Sistema -->
+        <div class="d-flex align-items-center gap-3 border-bottom border-secondary pb-4 mb-4">
+          <div class="avatar-circle rounded-3 bg-primary-subtle text-primary p-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+            <i [class]="sistemaIcone()" class="fs-2 text-primary"></i>
+          </div>
+          <div>
+            <h2 class="h3 fw-bold mb-0 text-white">{{ sistemaNome() }}</h2>
+            <span class="badge bg-success-subtle text-success border border-success px-3 py-1 rounded-pill mt-1">
+              <i class="fas fa-check-circle me-1"></i>Sistema Ativo
+            </span>
+          </div>
+        </div>
+
+        <!-- Informações Detalhadas do Sistema -->
+        <div class="row g-4">
+          <!-- Categoria -->
+          <div class="col-sm-6 col-12">
+            <label class="form-label small fw-bold text-white text-uppercase tracking-wider">Categoria / Módulo</label>
+            <p class="fw-semibold mb-0 text-white">
+              <i class="fas fa-layer-group text-primary me-2"></i>{{ sistemaCategoria() }}
+            </p>
+          </div>
+
+          <!-- URL Oficial de Acesso -->
+          <div class="col-sm-6 col-12">
+            <label class="form-label small fw-bold text-white text-uppercase tracking-wider">Link de Acesso (URL)</label>
+            <div class="mt-1">
+              <a
+                [href]="sistemaUrl()"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-primary text-decoration-none d-inline-flex align-items-center fw-semibold text-break"
+                title="Abrir Sistema"
+              >
+                <i class="fas fa-external-link-alt me-2"></i>
+                <span>{{ sistemaUrl() }}</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coluna Direita: Card Ações Rápidas -->
+    <div class="col-xl-4 col-12">
+      <div class="card border-0 shadow-sm p-4 tm-card rounded-4 h-100">
+        <h4 class="h5 fw-bold mb-4 text-white">
+          <i class="fas fa-sliders-h me-2 text-primary"></i>Ações Rápidas
+        </h4>
+
+        <div class="d-grid gap-3">
+          <button
+            type="button"
+            (click)="acessarSistema()"
+            class="btn btn-primary py-3 fw-bold w-100 shadow-sm d-flex align-items-center justify-content-center gap-2"
+          >
+            <i class="fas fa-external-link-alt"></i>
+            <span>Abrir Portal {{ sistemaNome() }}</span>
+          </button>
+
+          <button
+            type="button"
+            (click)="voltar()"
+            class="btn btn-outline-secondary py-2.5 fw-bold w-100 text-white"
+          >
+            <i class="fas fa-arrow-left me-2"></i>Voltar para Lista
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEÇÃO DE BLOCOS COLAPSÁVEIS (ACCORDIONS EXCLUSIVOS DO SISTEMA) -->
+  <div class="d-flex flex-column gap-4 mb-5">
+    <div class="border-top border-secondary pt-3">
+      <h4 class="h5 fw-bold text-white mb-3 d-flex align-items-center gap-2">
+        <i class="fas fa-cogs text-primary"></i>Ferramentas Exclusivas do {{ sistemaNome() }}
+      </h4>
+      <p class="text-white opacity-75 small mb-0">
+        Gerencie a conexão do WhatsApp e os disparos em lote isoladamente para este sistema.
+      </p>
+    </div>
+
+    <!-- BLOCO 1: Conectar WhatsApp (Colapsável) -->
+    <div class="card border border-secondary shadow-sm rounded-4 overflow-hidden bg-dark">
+      <div
+        class="card-header bg-dark p-4 d-flex align-items-center justify-content-between cursor-pointer border-0"
+        (click)="toggleWhatsapp()"
+      >
+        <div class="d-flex align-items-center gap-3">
+          <div class="rounded-3 bg-success-subtle text-success p-2.5 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+            <i class="fab fa-whatsapp fs-4"></i>
+          </div>
+          <div>
+            <h5 class="fw-bold text-white mb-0 d-flex align-items-center gap-2">
+              Conectar WhatsApp ({{ sistemaNome() }})
+            </h5>
+            <span class="text-muted small">Gerencie o QR Code e o estado da instância WhatsApp exclusiva do {{ sistemaNome() }}.</span>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge bg-primary-subtle text-primary border border-primary px-3 py-1.5 rounded-pill small fw-medium d-none d-md-inline-block">
+            Instância Exclusiva: {{ sistemaId() }}
+          </span>
+          <button class="btn btn-sm btn-outline-secondary rounded-circle p-0 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;">
+            <i [class]="whatsappExpanded() ? 'fas fa-chevron-up' : 'fas fa-chevron-down'" class="text-white"></i>
+          </button>
+        </div>
+      </div>
+
+      @if (whatsappExpanded()) {
+        <div class="card-body p-4 border-top border-secondary">
+          <app-whatsapp-conexao [instanceName]="sistemaId()"></app-whatsapp-conexao>
+        </div>
+      }
+    </div>
+
+    <!-- BLOCO 2: Disparo em Lote (Colapsável) -->
+    <div class="card border border-secondary shadow-sm rounded-4 overflow-hidden bg-dark">
+      <div
+        class="card-header bg-dark p-4 d-flex align-items-center justify-content-between cursor-pointer border-0"
+        (click)="toggleDisparo()"
+      >
+        <div class="d-flex align-items-center gap-3">
+          <div class="rounded-3 bg-primary-subtle text-primary p-2.5 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+            <i class="fas fa-paper-plane fs-4 text-primary"></i>
+          </div>
+          <div>
+            <h5 class="fw-bold text-white mb-0 d-flex align-items-center gap-2">
+              Disparo em Lote ({{ sistemaNome() }})
+            </h5>
+            <span class="text-muted small">Envio em lote de mensagens com intervalo anti-ban e acompanhamento ao vivo para {{ sistemaNome() }}.</span>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge bg-primary-subtle text-primary border border-primary px-3 py-1.5 rounded-pill small fw-medium d-none d-md-inline-block">
+            Módulo de Disparo: {{ sistemaId() }}
+          </span>
+          <button class="btn btn-sm btn-outline-secondary rounded-circle p-0 d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;">
+            <i [class]="disparoExpanded() ? 'fas fa-chevron-up' : 'fas fa-chevron-down'" class="text-white"></i>
+          </button>
+        </div>
+      </div>
+
+      @if (disparoExpanded()) {
+        <div class="card-body p-4 border-top border-secondary">
+          <app-disparo-mensagens [instanceName]="sistemaId()"></app-disparo-mensagens>
+        </div>
+      }
+    </div>
+  </div>
+</div>

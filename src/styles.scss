@@ -1,0 +1,62 @@
+/* Global Styles - TechMinds Hub */
+
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+@import '@angular/cdk/overlay-prebuilt.css';
+
+:root {
+  --tm-primary: #4f46e5;
+  --tm-primary-hover: #4338ca;
+  --tm-success: #10b981;
+  --tm-warning: #f59e0b;
+  --tm-danger: #ef4444;
+  --tm-dark-bg: #0f172a;
+  --tm-card-bg: #1e293b;
+  --tm-border-color: #334155;
+  --tm-text-light: #ffffff;
+  --tm-text-muted: #cbd5e1;
+}
+
+body {
+  background-color: var(--tm-dark-bg);
+  color: var(--tm-text-light);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+.text-muted,
+.text-secondary {
+  color: #e2e8f0 !important;
+}
+
+.tm-card {
+  background-color: var(--tm-card-bg);
+  border: 1px solid var(--tm-border-color);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+.tm-badge-success {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.tm-badge-warning {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.tm-badge-danger {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.tm-badge-info {
+  background-color: rgba(79, 70, 229, 0.2);
+  color: #818cf8;
+  border: 1px solid rgba(79, 70, 229, 0.4);
+}
