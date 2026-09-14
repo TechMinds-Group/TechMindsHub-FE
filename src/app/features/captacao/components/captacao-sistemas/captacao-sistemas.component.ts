@@ -54,7 +54,7 @@ export class CaptacaoSistemasComponent {
       descricao: 'Plataforma completa para gestão de agendamentos, clientes, serviços e planos em barbearias e salões.',
       categoria: 'Gestão de Agendamentos',
       status: 'Ativo',
-      url: 'https://groom.techminds.net.br/sg-auth-x7k9p',
+      url: 'https://hub.techminds.net.br/sg-auth-x7k9p',
       icone: 'fas fa-cut',
       dataIntegracao: '11/09/2026'
     },

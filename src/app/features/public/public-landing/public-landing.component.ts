@@ -19,6 +19,6 @@ export class PublicLandingComponent {
   }
 
   irParaGroom(): void {
-    window.location.href = 'https://groom.techminds.net.br/sg-auth-x7k9p';
+    window.location.href = 'https://hub.techminds.net.br/sg-auth-x7k9p';
   }
 }

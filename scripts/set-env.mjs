@@ -1,6 +1,6 @@
 import { writeFileSync, mkdirSync } from 'fs';
 
-const apiUrl = process.env['NG_APP_API_URL'] || 'https://api.techmindshub.techminds.net.br';
+const apiUrl = process.env['NG_APP_API_URL'] || 'https://hub-api.techminds.net.br';
 
 const content = `// Este arquivo é gerado automaticamente pelo script scripts/set-env.mjs durante o build
 export const environment = {
