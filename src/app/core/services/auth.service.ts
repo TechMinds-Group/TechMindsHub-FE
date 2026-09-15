@@ -4,7 +4,7 @@ import { Observable, Subject, tap, switchMap, catchError, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface LoginRequest {
-  estabelecimento: string;
+  estabelecimento?: string;
   email: string;
   password: string;
   rememberMe?: boolean;

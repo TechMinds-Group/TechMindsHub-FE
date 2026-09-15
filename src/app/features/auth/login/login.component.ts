@@ -19,14 +19,13 @@ export class LoginComponent implements OnInit {
   private readonly router = inject(Router);
 
   loginForm = this.fb.group({
-    estabelecimento: ['', [Validators.required]],
     email: ['', [Validators.required]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
+    password: ['', [Validators.required, Validators.minLength(8)]],
     rememberMe: [false]
   });
 
   newPasswordForm = this.fb.group({
-    newPassword: ['', [Validators.required, Validators.minLength(6)]],
+    newPassword: ['', [Validators.required, Validators.minLength(8)]],
     confirmPassword: ['', [Validators.required]]
   });
 
@@ -37,17 +36,10 @@ export class LoginComponent implements OnInit {
   ngOnInit(): void {
     const rememberMe = sessionStorage.getItem('login_remember_me') === 'true';
     if (rememberMe) {
-      const estabelecimento = sessionStorage.getItem('login_estabelecimento') || '';
       const email = sessionStorage.getItem('login_email') || '';
       this.loginForm.patchValue({
         rememberMe: true,
-        estabelecimento,
         email
-      });
-    } else {
-      // Valor padrão para agilizar o acesso no desenvolvimento
-      this.loginForm.patchValue({
-        estabelecimento: 'TechMindsHub'
       });
     }
   }
@@ -61,19 +53,17 @@ export class LoginComponent implements OnInit {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
-    const { estabelecimento, email, password, rememberMe } = this.loginForm.value;
+    const { email, password, rememberMe } = this.loginForm.value;
 
-    this.authService.login({ estabelecimento: estabelecimento!, email: email!, password: password! }, rememberMe!)
+    this.authService.login({ email: email!, password: password! }, rememberMe!)
       .subscribe({
         next: () => {
           this.isLoading.set(false);
           if (rememberMe) {
             sessionStorage.setItem('login_remember_me', 'true');
-            sessionStorage.setItem('login_estabelecimento', estabelecimento!);
             sessionStorage.setItem('login_email', email!);
           } else {
             sessionStorage.removeItem('login_remember_me');
-            sessionStorage.removeItem('login_estabelecimento');
             sessionStorage.removeItem('login_email');
           }
           this.router.navigate(['/disparo']);
