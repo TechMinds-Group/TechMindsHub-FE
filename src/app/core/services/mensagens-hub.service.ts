@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
+import { environment } from '../../../environments/environment';
 import { ProgressoEnvio } from '../models/mensagem.model';
 
 @Injectable({
@@ -7,7 +8,7 @@ import { ProgressoEnvio } from '../models/mensagem.model';
 })
 export class MensagensHubService {
   private hubConnection: signalR.HubConnection | null = null;
-  private readonly hubUrl = 'http://localhost:5005/hubs/mensagens';
+  private readonly hubUrl = `${environment.apiUrl}/hubs/mensagens`;
 
   readonly progressoAtual = signal<ProgressoEnvio | null>(null);
   readonly logs = signal<ProgressoEnvio[]>([]);

@@ -77,7 +77,7 @@ export class WhatsappConexaoComponent implements OnInit, OnDestroy {
             instancia: this.instanceName,
             conectado: false,
             mensagem: 'Não foi possível se comunicar com o backend ou Evolution API.',
-            managerUrl: 'http://localhost:8089'
+            managerUrl: ''
           });
           this.carregando.set(false);
         }

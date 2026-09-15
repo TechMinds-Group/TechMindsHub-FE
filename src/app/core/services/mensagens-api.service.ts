@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { EnviarMensagemRequest, EnviarLoteRequest, EnviarLoteResponse, ResultadoItem, StatusConexao, QrCode, Contato, ImportarEstabelecimentosRequest, ImportarEstabelecimentosResponse, TemplateMensagemItem, SalvarTemplatesRequest } from '../models/mensagem.model';
 
 @Injectable({
@@ -8,9 +9,10 @@ import { EnviarMensagemRequest, EnviarLoteRequest, EnviarLoteResponse, Resultado
 })
 export class MensagensApiService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:5005/api/mensagens';
-  private readonly whatsappUrl = 'http://localhost:5005/api/whatsapp';
-  private readonly templatesUrl = 'http://localhost:5005/api/templates-mensagem';
+  private readonly baseUrl = `${environment.apiUrl}/api/mensagens`;
+  private readonly whatsappUrl = `${environment.apiUrl}/api/whatsapp`;
+  private readonly templatesUrl = `${environment.apiUrl}/api/templates-mensagem`;
+  private readonly estabelecimentosUrl = `${environment.apiUrl}/api/estabelecimentos`;
 
   /**
    * Envia uma mensagem individual através da API backend.
@@ -56,21 +58,21 @@ export class MensagensApiService {
    * Obtém a lista de estabelecimentos persistidos no banco de dados.
    */
   obterEstabelecimentos(): Observable<Contato[]> {
-    return this.http.get<Contato[]>('http://localhost:5005/api/estabelecimentos');
+    return this.http.get<Contato[]>(this.estabelecimentosUrl);
   }
 
   /**
    * Envia lote de estabelecimentos extraídos da planilha para persistência com desduplicação no banco.
    */
   importarEstabelecimentos(payload: ImportarEstabelecimentosRequest): Observable<ImportarEstabelecimentosResponse> {
-    return this.http.post<ImportarEstabelecimentosResponse>('http://localhost:5005/api/estabelecimentos/importar', payload);
+    return this.http.post<ImportarEstabelecimentosResponse>(`${this.estabelecimentosUrl}/importar`, payload);
   }
 
   /**
    * Remove todos os estabelecimentos cadastrados no banco de dados.
    */
   limparEstabelecimentos(): Observable<{ mensagem: string }> {
-    return this.http.delete<{ mensagem: string }>('http://localhost:5005/api/estabelecimentos');
+    return this.http.delete<{ mensagem: string }>(this.estabelecimentosUrl);
   }
 
   /**

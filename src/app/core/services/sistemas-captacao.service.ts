@@ -20,7 +20,7 @@ export interface SistemaItem {
 })
 export class SistemasCaptacaoService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = `${environment.apiUrl}/api/SistemasCaptacao`;
+  private readonly apiUrl = `${environment.apiUrl}/api/sistemas-captacao`;
 
   getAll(): Observable<SistemaItem[]> {
     return this.http.get<SistemaItem[]>(this.apiUrl);
