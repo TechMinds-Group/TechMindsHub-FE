@@ -23,17 +23,6 @@
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form" autocomplete="on">
         <div class="form-group">
           <tm-text
-            formControlName="estabelecimento"
-            label="Estabelecimento"
-            placeholder="Nome do seu estabelecimento"
-            name="estabelecimento"
-            autocomplete="organization"
-            [control]="loginForm.get('estabelecimento')">
-          </tm-text>
-        </div>
-
-        <div class="form-group">
-          <tm-text
             formControlName="email"
             label="E-mail ou Usuário"
             placeholder="Seu e-mail ou usuário"
@@ -78,7 +67,7 @@
             formControlName="newPassword"
             label="Nova Senha"
             type="password"
-            placeholder="Digite no mínimo 6 caracteres"
+            placeholder="Digite no mínimo 8 caracteres"
             [control]="newPasswordForm.get('newPassword')">
           </tm-text>
         </div>

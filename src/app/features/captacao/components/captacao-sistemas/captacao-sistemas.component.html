@@ -6,22 +6,40 @@
         <i class="fas fa-magnet text-primary me-2"></i>Captação — Lista de Sistemas
       </h2>
       <p class="text-white opacity-85 mb-0">
-        Visualize a lista de sistemas integrados na plataforma. Clique na linha para visualizar os detalhes completos do sistema.
+        Gerencie os sistemas integrados na plataforma. Clique na linha para visualizar os detalhes ou use os botões para editar/remover.
       </p>
     </div>
+    <button class="btn btn-primary d-inline-flex align-items-center gap-2 shadow-sm fw-semibold px-3 py-2" (click)="abrirModalCriacao()">
+      <i class="fas fa-plus fs-6"></i>
+      <span>Novo Sistema</span>
+    </button>
   </div>
 
-  <!-- Custom Groom tm-table Component -->
-  <div class="mb-5">
-    <tm-table
-      [cols]="cols()"
-      [data]="sistemas()"
-      [paginated]="true"
-      [pageSize]="tamanhoPagina()"
-      (pageSizeChange)="tamanhoPagina.set($event)"
-      [showControls]="true"
-      (rowClick)="verDetalhes($event)"
-    ></tm-table>
+  @if (errorMessage()) {
+    <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+      <i class="fas fa-exclamation-triangle me-2 fs-5"></i>
+      <div>{{ errorMessage() }}</div>
+    </div>
+  }
+
+  <!-- Custom tm-table Component -->
+  <div class="mb-5 position-relative">
+    @if (isLoading()) {
+      <div class="d-flex justify-content-center align-items-center p-5">
+        <div class="spinner-border text-primary me-2" role="status"></div>
+        <span class="text-white">Carregando sistemas...</span>
+      </div>
+    } @else {
+      <tm-table
+        [cols]="cols()"
+        [data]="sistemas()"
+        [paginated]="true"
+        [pageSize]="tamanhoPagina()"
+        (pageSizeChange)="tamanhoPagina.set($event)"
+        [showControls]="true"
+        (rowClick)="verDetalhes($event)"
+      ></tm-table>
+    }
   </div>
 </div>
 
@@ -55,9 +73,91 @@
     <span class="badge bg-success-subtle text-success border border-success px-3 py-1.5 rounded-pill fw-semibold">
       <i class="fas fa-check-circle me-1"></i>Ativo
     </span>
+  } @else if (item.status === 'Em Manutenção') {
+    <span class="badge bg-warning-subtle text-warning border border-warning px-3 py-1.5 rounded-pill fw-semibold">
+      <i class="fas fa-tools me-1"></i>Manutenção
+    </span>
   } @else {
     <span class="badge bg-secondary-subtle text-secondary border border-secondary px-3 py-1.5 rounded-pill fw-semibold">
-      {{ item.status }}
+      <i class="fas fa-times-circle me-1"></i>Inativo
     </span>
   }
 </ng-template>
+
+<ng-template #acoesTemplate let-item>
+  <div class="d-flex align-items-center gap-2" (click)="$event.stopPropagation()">
+    <button class="btn btn-sm btn-outline-light border-secondary p-1 px-2" title="Editar" (click)="abrirModalEdicao(item, $event)">
+      <i class="fas fa-edit text-primary"></i>
+    </button>
+    <button class="btn btn-sm btn-outline-danger p-1 px-2" title="Remover" (click)="confirmarExclusao(item, $event)">
+      <i class="fas fa-trash-alt"></i>
+    </button>
+  </div>
+</ng-template>
+
+<!-- Modal Modal Inclusão / Edição -->
+@if (showModal()) {
+  <div class="modal d-block tab-modal-backdrop" tabindex="-1" style="background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark border border-secondary text-white shadow-lg rounded-3">
+        <div class="modal-header border-bottom border-secondary">
+          <h5 class="modal-title fw-bold d-flex align-items-center gap-2">
+            <i class="fas text-primary" [ngClass]="isEditing() ? 'fa-edit' : 'fa-plus-circle'"></i>
+            <span>{{ isEditing() ? 'Editar Sistema de Captação' : 'Novo Sistema de Captação' }}</span>
+          </h5>
+          <button type="button" class="btn-close btn-close-white" (click)="fecharModal()"></button>
+        </div>
+        <div class="modal-body">
+          <form (ngSubmit)="salvar()">
+            <div class="mb-3">
+              <label class="form-label text-light fw-medium">Nome do Sistema *</label>
+              <input type="text" class="form-control bg-secondary-subtle text-white border-secondary" [ngModel]="formData().nome" (ngModelChange)="updateFormField('nome', $event)" name="nome" placeholder="Ex: Groom, Abóbora" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label text-light fw-medium">Categoria *</label>
+              <input type="text" class="form-control bg-secondary-subtle text-white border-secondary" [ngModel]="formData().categoria" (ngModelChange)="updateFormField('categoria', $event)" name="categoria" placeholder="Ex: Gestão de Agendamentos" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label text-light fw-medium">Descrição</label>
+              <textarea class="form-control bg-secondary-subtle text-white border-secondary" rows="3" [ngModel]="formData().descricao" (ngModelChange)="updateFormField('descricao', $event)" name="descricao" placeholder="Descrição resumida do sistema"></textarea>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label text-light fw-medium">Status</label>
+                <select class="form-select bg-secondary-subtle text-white border-secondary" [ngModel]="formData().status" (ngModelChange)="updateFormField('status', $event)" name="status">
+                  <option value="Ativo">Ativo</option>
+                  <option value="Inativo">Inativo</option>
+                  <option value="Em Manutenção">Em Manutenção</option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label text-light fw-medium">Ícone (FontAwesome)</label>
+                <input type="text" class="form-control bg-secondary-subtle text-white border-secondary" [ngModel]="formData().icone" (ngModelChange)="updateFormField('icone', $event)" name="icone" placeholder="Ex: fas fa-cut">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label text-light fw-medium">URL / Domínio de Acesso</label>
+              <input type="url" class="form-control bg-secondary-subtle text-white border-secondary" [ngModel]="formData().url" (ngModelChange)="updateFormField('url', $event)" name="url" placeholder="https://groom.techminds.net.br">
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 pt-2 border-top border-secondary">
+              <button type="button" class="btn btn-outline-secondary text-light px-4" (click)="fecharModal()">Cancelar</button>
+              <button type="submit" class="btn btn-primary px-4 fw-semibold" [disabled]="isSaving()">
+                @if (isSaving()) {
+                  <span>Salvando...</span>
+                } @else {
+                  <span>Salvar</span>
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+}
