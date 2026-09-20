@@ -32,6 +32,11 @@ export class SidebarComponent {
       label: 'Captação',
       icon: 'fas fa-magnet',
       route: '/captacao'
+    },
+    {
+      label: 'Coleta de Leads',
+      icon: 'fas fa-user-plus',
+      route: '/coleta'
     }
   ]);
 

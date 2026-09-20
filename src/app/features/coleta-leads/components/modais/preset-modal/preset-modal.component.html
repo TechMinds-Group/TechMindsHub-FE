@@ -1,0 +1,99 @@
+@if (aberto()) {
+  <div class="modal d-block preset-modal-backdrop" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark border border-secondary text-white shadow-lg rounded-3">
+        <div class="modal-header border-bottom border-secondary">
+          <h5 class="modal-title fw-bold d-flex align-items-center gap-2">
+            <i class="fas fa-bookmark text-primary"></i>
+            <span>{{ modo() === 'editar' ? 'Editar Preset' : 'Salvar como Preset' }}</span>
+          </h5>
+          <button type="button" class="btn-close btn-close-white" (click)="fechar()"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label text-light fw-medium">Nome do Preset *</label>
+            <input
+              type="text"
+              class="form-control bg-dark text-white border-secondary"
+              [ngModel]="nome()"
+              (ngModelChange)="nome.set($event)"
+              name="nomePreset"
+              placeholder="Ex.: Barbearias POA…"
+            />
+            @if (erroNome()) {
+              <div class="text-danger small mt-1">
+                <i class="fas fa-exclamation-circle me-1"></i>{{ erroNome() }}
+              </div>
+            }
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-light fw-medium">Nichos</label>
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control bg-dark text-white border-secondary"
+                [ngModel]="novoNicho()"
+                (ngModelChange)="novoNicho.set($event)"
+                (keydown.enter)="adicionarNicho(novoNicho()); $event.preventDefault()"
+                name="novoNicho"
+                placeholder="Ex.: barbearia, petshop, café…"
+              />
+              <button type="button" class="btn btn-outline-primary" (click)="adicionarNicho(novoNicho())">
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
+            @if (nichos().length > 0) {
+              <div class="d-flex flex-wrap gap-2 mt-2">
+                @for (nicho of nichos(); track nicho) {
+                  <span class="chip chip-nicho">
+                    {{ nicho }}
+                    <button type="button" class="chip-remover" (click)="removerNicho(nicho)" [attr.aria-label]="'Remover ' + nicho">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </span>
+                }
+              </div>
+            }
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-light fw-medium">Cidades</label>
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control bg-dark text-white border-secondary"
+                [ngModel]="novaCidade()"
+                (ngModelChange)="novaCidade.set($event)"
+                (keydown.enter)="adicionarCidade(novaCidade()); $event.preventDefault()"
+                name="novaCidade"
+                placeholder="Ex.: Porto Alegre, RS…"
+              />
+              <button type="button" class="btn btn-outline-primary" (click)="adicionarCidade(novaCidade())">
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
+            @if (cidades().length > 0) {
+              <div class="d-flex flex-wrap gap-2 mt-2">
+                @for (cidade of cidades(); track cidade) {
+                  <span class="chip">
+                    {{ cidade }}
+                    <button type="button" class="chip-remover" (click)="removerCidade(cidade)" [attr.aria-label]="'Remover ' + cidade">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </span>
+                }
+              </div>
+            }
+          </div>
+        </div>
+        <div class="modal-footer border-top border-secondary">
+          <button type="button" class="btn btn-outline-secondary text-light px-4" (click)="fechar()">Cancelar</button>
+          <button type="button" class="btn btn-primary px-4 fw-semibold" (click)="confirmar()">
+            {{ modo() === 'editar' ? 'Salvar Alterações' : 'Salvar Preset' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
