@@ -23,6 +23,22 @@ export interface ItemImportacao {
   temWhatsApp?: boolean;
 }
 
+export interface ItemImportacaoEspecial {
+  id?: number;
+  nome: string;
+  numero: string;
+  endereco?: string;
+  site?: string;
+  tipos?: string;
+  nichoBuscado?: string;
+  cidadeBuscada?: string;
+  enviado?: boolean;
+  falhou?: boolean;
+  temWhatsApp?: boolean;
+  dataEnvio?: string;
+  dataCriacao?: string;
+}
+
 export interface ImportarEstabelecimentosRequest {
   estabelecimentos: ItemImportacao[];
 }

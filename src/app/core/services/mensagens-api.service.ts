@@ -69,6 +69,13 @@ export class MensagensApiService {
   }
 
   /**
+   * Importação Especial JSON de estabelecimentos com histórico (Enviado, Falhou, TemWhatsApp).
+   */
+  importarEspecial(payload: any): Observable<ImportarEstabelecimentosResponse> {
+    return this.http.post<ImportarEstabelecimentosResponse>(`${this.estabelecimentosUrl}/importar-especial`, payload);
+  }
+
+  /**
    * Remove todos os estabelecimentos cadastrados no banco de dados.
    */
   limparEstabelecimentos(): Observable<{ mensagem: string }> {

@@ -127,8 +127,60 @@
               >
                 <i class="fas fa-plus me-1"></i>Importar Nova Planilha
               </button>
+        </div>
+
+        <!-- Painel de Importação Especial (.json) -->
+        <div class="mb-4 p-3 rounded bg-dark border border-warning">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <label class="form-label text-warning fw-medium mb-0">
+              <i class="fas fa-file-code text-warning me-2"></i>Importação Especial (.json)
+            </label>
+          </div>
+
+          <input
+            #jsonFileInput
+            type="file"
+            accept=".json"
+            (change)="onJsonSelected($event)"
+            class="d-none"
+          />
+
+          <button
+            type="button"
+            class="btn btn-outline-warning w-100 fw-bold py-2 d-flex align-items-center justify-content-center"
+            (click)="jsonFileInput.click()"
+            [disabled]="executando() || importandoJSON()"
+          >
+            @if (importandoJSON()) {
+              <i class="fas fa-spinner fa-spin me-2"></i>Importando e Atualizando Banco...
+            } @else {
+              <i class="fas fa-file-import me-2"></i>Importar JSON Especial (Lote Completo)
+            }
+          </button>
+
+          @if (importandoJSON()) {
+            <div class="mt-3">
+              <div class="progress bg-dark border border-secondary" style="height: 22px;">
+                <div
+                  class="progress-bar progress-bar-striped progress-bar-animated bg-warning text-dark fw-bold"
+                  role="progressbar"
+                  [style.width.%]="progressoImportacaoBanco()"
+                  [attr.aria-valuenow]="progressoImportacaoBanco()"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                >
+                  {{ progressoImportacaoBanco() }}%
+                </div>
+              </div>
+              <div class="small text-warning text-center fw-bold mt-2">
+                <i class="fas fa-database me-1"></i>{{ statusImportacaoTexto() }}
+              </div>
             </div>
           }
+
+          <div class="form-text text-secondary mt-1">
+            Suporta lotes JSON com suporte a histórico (Id, Nome, Numero, Endereco, Site, Tipos, NichoBuscado, CidadeBuscada, Enviado, Falhou, TemWhatsApp, DataEnvio).
+          </div>
         </div>
 
         <!-- Seletor de Quantidade de Estabelecimentos a Enviar -->

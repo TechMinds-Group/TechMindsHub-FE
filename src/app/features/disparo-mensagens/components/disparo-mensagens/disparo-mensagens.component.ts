@@ -30,6 +30,7 @@ export class DisparoMensagensComponent implements OnInit, OnDestroy {
   readonly relatorioImportacao = signal<ImportarEstabelecimentosResponse | null>(null);
   readonly exibirPainelUpload = signal<boolean>(true);
   readonly importandoCSV = signal<boolean>(false);
+  readonly importandoJSON = signal<boolean>(false);
   readonly progressoImportacaoBanco = signal<number>(0);
   readonly statusImportacaoTexto = signal<string>('');
 
@@ -240,6 +241,69 @@ export class DisparoMensagensComponent implements OnInit, OnDestroy {
 
     reader.readAsText(file, 'UTF-8');
     input.value = ''; // Reset do input para permitir re-upload
+  }
+
+  /**
+   * Processa a seleção de arquivo JSON de Importação Especial (Lote Completo de até 3000+ registros).
+   */
+  onJsonSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) {
+      return;
+    }
+
+    const file = input.files[0];
+    this.importandoJSON.set(true);
+    this.erroEnvio.set(null);
+    this.progressoImportacaoBanco.set(15);
+    this.statusImportacaoTexto.set('Lendo dados do arquivo JSON...');
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const text = e.target?.result as string;
+        const parsed = JSON.parse(text);
+        let items: any[] = [];
+        if (Array.isArray(parsed)) {
+          items = parsed;
+        } else if (parsed && Array.isArray(parsed.estabelecimentos)) {
+          items = parsed.estabelecimentos;
+        }
+
+        if (items.length === 0) {
+          this.erroEnvio.set('Nenhum estabelecimento válido encontrado no arquivo JSON.');
+          this.importandoJSON.set(false);
+          input.value = '';
+          return;
+        }
+
+        this.progressoImportacaoBanco.set(50);
+        this.statusImportacaoTexto.set(`Persistindo ${items.length} estabelecimentos no banco...`);
+
+        this.mensagensApi.importarEspecial(items).subscribe({
+          next: (res) => {
+            this.progressoImportacaoBanco.set(100);
+            this.relatorioImportacao.set(res);
+            this.importandoJSON.set(false);
+            this.carregarEstabelecimentosDoBanco();
+            input.value = '';
+          },
+          error: (err) => {
+            console.error('Erro na importação especial JSON:', err);
+            this.erroEnvio.set(err.error?.mensagem || err.error?.detail || 'Erro ao processar importação especial JSON.');
+            this.importandoJSON.set(false);
+            input.value = '';
+          }
+        });
+      } catch (errEx) {
+        console.error('Erro de parsing JSON:', errEx);
+        this.erroEnvio.set('O arquivo selecionado não contém uma estrutura JSON válida.');
+        this.importandoJSON.set(false);
+        input.value = '';
+      }
+    };
+
+    reader.readAsText(file, 'UTF-8');
   }
 
   /**
