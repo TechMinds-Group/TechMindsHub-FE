@@ -1,0 +1,218 @@
+.list-group-item {
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.04) !important;
+  }
+}
+
+.badge .btn-link {
+  text-decoration: none;
+  line-height: 1;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.35rem 0.5rem 0.35rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #e2e8f0;
+  background-color: #1e293b;
+  border: 1px solid #475569;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    background-color: #273449;
+    border-color: #64748b;
+  }
+
+  &.chip-nicho {
+    color: #93c5fd;
+    background-color: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.45);
+
+    &:hover {
+      background-color: rgba(59, 130, 246, 0.2);
+      border-color: rgba(59, 130, 246, 0.65);
+    }
+  }
+
+  .chip-remover {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: inherit;
+    opacity: 0.7;
+    font-size: 0.75rem;
+    line-height: 1;
+    transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+
+    &:hover {
+      opacity: 1;
+      background-color: rgba(220, 38, 38, 0.2);
+      color: #f87171;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #64748b;
+      outline-offset: 1px;
+    }
+  }
+}
+
+.table th {
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #cbd5e1;
+}
+
+// Wrapper do botão de excluir desabilitado (title não é exibido pelo botão disabled em todos os browsers)
+.acao-excluir-desabilitada {
+  display: inline-flex;
+  align-items: center;
+  cursor: not-allowed;
+}
+
+// ===== Tabela de leads coletados =====
+
+// Placeholders legíveis sobre inputs escuros (default Bootstrap #6c757d some no bg-dark)
+.form-control::placeholder {
+  color: #94a3b8;
+  opacity: 1;
+}
+
+.lead-nome {
+  max-width: 100%;
+}
+
+.lead-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #e2e8f0;
+
+  &.lead-avatar-azul     { background: rgba(59, 130, 246, 0.2);  color: #93c5fd; }
+  &.lead-avatar-verde    { background: rgba(16, 185, 129, 0.2);  color: #6ee7b7; }
+  &.lead-avatar-roxo     { background: rgba(139, 92, 246, 0.2);  color: #c4b5fd; }
+  &.lead-avatar-laranja  { background: rgba(249, 115, 22, 0.2);  color: #fdba74; }
+  &.lead-avatar-ciano    { background: rgba(6, 182, 212, 0.2);   color: #67e8f9; }
+}
+
+.btn-copiar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 1px solid #475569;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    background-color: rgba(59, 130, 246, 0.15);
+    border-color: #3b82f6;
+    color: #93c5fd;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #64748b;
+    outline-offset: 1px;
+  }
+}
+
+.lead-endereco {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.85rem;
+}
+
+.lead-site {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.85rem;
+  color: #93c5fd;
+  text-decoration: none;
+
+  &:hover {
+    color: #bfdbfe;
+    text-decoration: underline;
+  }
+}
+
+.lead-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #67e8f9;
+  background-color: rgba(6, 182, 212, 0.1);
+  border: 1px solid rgba(6, 182, 212, 0.35);
+
+  i {
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    opacity: 0.85;
+  }
+}
+
+/* ===== Empty state — leads ===== */
+
+.empty-leads {
+  background-color: #161b22 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+
+  .card-body {
+    background-color: transparent;
+  }
+}
+
+.empty-leads-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background-color: rgba(148, 163, 184, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+
+  i {
+    font-size: 1.1rem;
+    color: #94a3b8;
+  }
+}

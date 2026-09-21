@@ -31,6 +31,14 @@ export const routes: Routes = [
       )
   },
   {
+    path: 'coleta',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/coleta-leads/components/coleta-leads/coleta-leads.component').then(
+        (m) => m.ColetaLeadsComponent
+      )
+  },
+  {
     path: 'captacao',
     canActivate: [authGuard],
     children: [

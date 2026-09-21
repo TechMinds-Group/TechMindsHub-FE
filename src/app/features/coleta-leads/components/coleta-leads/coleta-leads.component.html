@@ -1,0 +1,438 @@
+<div class="container py-4">
+  <!-- Header -->
+  <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3">
+    <div>
+      <h2 class="fw-bold text-white mb-1 d-flex align-items-center gap-2">
+        <i class="fas fa-user-plus text-primary me-2"></i>Coleta de Leads
+      </h2>
+      <p class="text-white opacity-85 mb-0">
+        Selecione nichos e cidades para iniciar uma campanha de coleta, reutilize presets e acompanhe os leads capturados.
+      </p>
+    </div>
+  </div>
+
+  @if (mensagem()) {
+    <div class="alert alert-dismissible d-flex align-items-center mb-4 fade show" [class.alert-success]="mensagemTipo() === 'success'" [class.alert-danger]="mensagemTipo() === 'danger'" [class.alert-warning]="mensagemTipo() === 'warning'" role="alert">
+      <i class="fas me-2 fs-5" [class.fa-check-circle]="mensagemTipo() === 'success'" [class.fa-exclamation-triangle]="mensagemTipo() === 'danger'" [class.fa-info-circle]="mensagemTipo() === 'warning'"></i>
+      <div>{{ mensagem() }}</div>
+      <button type="button" class="btn-close" (click)="mensagem.set(null)"></button>
+    </div>
+  }
+
+  <!-- ===== Seleção de busca (RN-017) ===== -->
+  <div class="card bg-dark border border-secondary rounded-3 mb-4">
+    <div class="card-header border-bottom border-secondary">
+      <h5 class="mb-0 fw-bold text-white">
+        <i class="fas fa-crosshairs text-primary me-2"></i>Seleção de Busca
+      </h5>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label text-light fw-medium">Nichos</label>
+          <div class="input-group">
+            <input
+              type="text"
+              class="form-control bg-dark text-white border-secondary"
+              [ngModel]="novoNicho()"
+              (ngModelChange)="novoNicho.set($event)"
+              (keydown.enter)="adicionarNicho(); $event.preventDefault()"
+              name="novoNicho"
+              placeholder="Ex.: barbearia, petshop, café…"
+            />
+            <button type="button" class="btn btn-outline-primary" (click)="adicionarNicho()">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+          @if (nichosSelecionados().length > 0) {
+            <div class="d-flex flex-wrap gap-2 mt-2">
+              @for (nicho of nichosSelecionados(); track nicho) {
+                <span class="chip chip-nicho">
+                  {{ nicho }}
+                  <button type="button" class="chip-remover" (click)="removerNicho(nicho)" [attr.aria-label]="'Remover ' + nicho">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </span>
+              }
+            </div>
+          }
+        </div>
+        <div class="col-md-6">
+          <label class="form-label text-light fw-medium">Cidades</label>
+          <div class="input-group">
+            <input
+              type="text"
+              class="form-control bg-dark text-white border-secondary"
+              [ngModel]="novaCidade()"
+              (ngModelChange)="novaCidade.set($event)"
+              (keydown.enter)="adicionarCidade(); $event.preventDefault()"
+              name="novaCidade"
+              placeholder="Ex.: Porto Alegre, RS…"
+            />
+            <button type="button" class="btn btn-outline-primary" (click)="adicionarCidade()">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+          @if (cidadesSelecionadas().length > 0) {
+            <div class="d-flex flex-wrap gap-2 mt-2">
+              @for (cidade of cidadesSelecionadas(); track cidade) {
+                <span class="chip">
+                  {{ cidade }}
+                  <button type="button" class="chip-remover" (click)="removerCidade(cidade)" [attr.aria-label]="'Remover ' + cidade">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </span>
+              }
+            </div>
+          }
+        </div>
+      </div>
+      <div class="d-flex justify-content-end gap-2 mt-3">
+        <button
+          type="button"
+          class="btn btn-outline-light d-inline-flex align-items-center gap-2"
+          [disabled]="!temSelecao()"
+          (click)="abrirModalSalvarPreset()"
+        >
+          <i class="fas fa-bookmark"></i><span>Salvar como preset</span>
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary d-inline-flex align-items-center gap-2 fw-semibold px-3"
+          [disabled]="!temSelecao() || temCampanhaEmAndamento() || iniciandoColeta()"
+          (click)="iniciarColeta()"
+        >
+          @if (iniciandoColeta()) {
+            <span class="spinner-border spinner-border-sm me-1" role="status"></span><span>Iniciando...</span>
+          } @else {
+            <i class="fas fa-play"></i><span>Iniciar coleta</span>
+          }
+        </button>
+      </div>
+      @if (temCampanhaEmAndamento()) {
+        <div class="text-warning small mt-2">
+          <i class="fas fa-sync-alt fa-spin me-1"></i>Há campanha em andamento — o botão de nova coleta fica desabilitado até a conclusão.
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- ===== Presets (RN-018) ===== -->
+  <div class="card bg-dark border border-secondary rounded-3 mb-4">
+    <div class="card-header border-bottom border-secondary d-flex justify-content-between align-items-center">
+      <h5 class="mb-0 fw-bold text-white">
+        <i class="fas fa-bookmark text-primary me-2"></i>Presets Salvos
+      </h5>
+    </div>
+    <div class="card-body">
+      @if (isLoadingPresets()) {
+        <div class="d-flex justify-content-center align-items-center p-3">
+          <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+          <span class="text-white">Carregando presets...</span>
+        </div>
+      } @else if (presets().length === 0) {
+        <p class="text-muted mb-0">Nenhum preset salvo. Selecione nichos e cidades e use "Salvar como preset".</p>
+      } @else {
+        <div class="list-group list-group-flush">
+          @for (preset of presets(); track preset.id) {
+            <div class="list-group-item bg-transparent border-secondary d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 px-0 py-2">
+              <div>
+                <strong class="text-white d-block">{{ preset.nome }}</strong>
+                <small class="text-muted">{{ resumoPreset(preset) }}</small>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1" (click)="aplicarPreset(preset)">
+                  <i class="fas fa-wand-magic-sparkles"></i><span>Usar</span>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-light border-secondary" title="Editar" (click)="abrirModalEditarPreset(preset)">
+                  <i class="fas fa-edit text-primary"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" title="Excluir" (click)="excluirPreset(preset)">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- ===== Campanhas (RN-017/019) ===== -->
+  <div class="card bg-dark border border-secondary rounded-3 mb-4">
+    <div class="card-header border-bottom border-secondary d-flex justify-content-between align-items-center">
+      <h5 class="mb-0 fw-bold text-white">
+        <i class="fas fa-list-check text-primary me-2"></i>Campanhas
+      </h5>
+      @if (temCampanhaEmAndamento()) {
+        <span class="text-warning small">
+          <i class="fas fa-sync-alt fa-spin me-1"></i>Atualizando automaticamente...
+        </span>
+      }
+    </div>
+    <div class="card-body">
+      @if (isLoadingCampanhas() && campanhas().length === 0) {
+        <div class="d-flex justify-content-center align-items-center p-3">
+          <div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>
+          <span class="text-white">Carregando campanhas...</span>
+        </div>
+      } @else if (campanhas().length === 0) {
+        <p class="text-muted mb-0">Nenhuma campanha registrada. Inicie uma coleta para ver o histórico aqui.</p>
+      } @else {
+        <div class="table-responsive">
+          <table class="table table-dark table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th scope="col">Início</th>
+                <th scope="col">Busca</th>
+                <th scope="col">Status</th>
+                <th scope="col">Coletados</th>
+                <th scope="col">Duplicados</th>
+                <th scope="col" class="text-end">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (campanha of campanhas(); track campanha.id) {
+                <tr>
+                  <td class="text-white-50 small">{{ campanha.dataInicio | date: 'dd/MM/yyyy HH:mm' }}</td>
+                  <td class="small text-white">{{ campanha.nichos.join(', ') }} × {{ campanha.cidades.join(', ') }}</td>
+                  <td>
+                    <span class="badge px-3 py-2 rounded-pill fw-semibold" [class]="configStatus(campanha.status).badgeClass">
+                      <i class="me-1" [class]="configStatus(campanha.status).icon"></i>{{ configStatus(campanha.status).label }}
+                    </span>
+                  </td>
+                  <td class="fw-bold text-white">{{ campanha.totalColetados }}</td>
+                  <td class="text-white-50">{{ campanha.duplicadosIgnorados }}</td>
+                  <td class="text-end">
+                    @if (campanha.status === 'EmAndamento') {
+                      <span class="acao-excluir-desabilitada" title="Campanha em andamento — aguarde a conclusão para excluir">
+                        <button type="button" class="btn btn-sm btn-outline-danger" disabled aria-label="Excluir campanha (indisponível durante a coleta)">
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </span>
+                    } @else {
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-outline-danger"
+                        title="Excluir campanha e os leads coletados por ela"
+                        aria-label="Excluir campanha"
+                        (click)="excluirCampanha(campanha)"
+                      >
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    }
+                  </td>
+                </tr>
+                @if (campanha.status === 'Falha' && campanha.erro) {
+                  <tr>
+                    <td colspan="6" class="text-danger small border-0">
+                      <i class="fas fa-exclamation-triangle me-1"></i>{{ campanha.erro }}
+                    </td>
+                  </tr>
+                }
+              } @empty {
+                <tr>
+                  <td colspan="6" class="text-center py-4">
+                    <div class="d-flex flex-column align-items-center gap-1">
+                      <i class="fas fa-rocket text-secondary small"></i>
+                      <span class="text-secondary small">Nenhuma campanha executada ainda — inicie a primeira coleta acima.</span>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- ===== Leads coletados (RN-022) + Export VCF (RN-025) ===== -->
+  <div class="mb-5">
+    <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-3 gap-3">
+      <h5 class="mb-0 fw-bold text-white d-flex align-items-center gap-2">
+        <span><i class="fas fa-address-card text-primary me-2"></i>Leads Coletados</span>
+        @if (!isLoadingLeads()) {
+          <span class="badge bg-dark border border-secondary text-light fw-medium rounded-pill px-2 py-1 fs-6">
+            {{ leads().length }} {{ leads().length === 1 ? 'lead' : 'leads' }}
+          </span>
+        }
+      </h5>
+      <button
+        type="button"
+        class="btn btn-success d-inline-flex align-items-center gap-2 fw-semibold"
+        [disabled]="exportando()"
+        (click)="exportarVcf()"
+      >
+        @if (exportando()) {
+          <span class="spinner-border spinner-border-sm me-1" role="status"></span><span>Exportando...</span>
+        } @else {
+          <i class="fas fa-file-export"></i><span>Exportar VCF</span>
+        }
+      </button>
+    </div>
+
+    <div class="card bg-dark border border-secondary rounded-3 mb-3">
+      <div class="card-body py-3">
+        <div class="row g-2 align-items-end">
+          <div class="col-md-3">
+            <label class="form-label text-light small fw-medium mb-1">Nicho</label>
+            <input
+              type="text"
+              class="form-control form-control-sm bg-dark text-white border-secondary"
+              [ngModel]="filtroNicho()"
+              (ngModelChange)="filtroNicho.set($event)"
+              (keydown.enter)="aplicarFiltros()"
+              name="filtroNicho"
+              placeholder="Filtrar por nicho…"
+            />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label text-light small fw-medium mb-1">Cidade</label>
+            <input
+              type="text"
+              class="form-control form-control-sm bg-dark text-white border-secondary"
+              [ngModel]="filtroCidade()"
+              (ngModelChange)="filtroCidade.set($event)"
+              (keydown.enter)="aplicarFiltros()"
+              name="filtroCidade"
+              placeholder="Filtrar por cidade…"
+            />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label text-light small fw-medium mb-1">Campanha</label>
+            <select
+              class="form-select form-select-sm bg-dark text-white border-secondary"
+              [ngModel]="filtroCampanhaId()"
+              (ngModelChange)="filtroCampanhaId.set($event); aplicarFiltros()"
+              name="filtroCampanhaId"
+            >
+              <option value="">Todas as campanhas</option>
+              @for (campanha of campanhas(); track campanha.id) {
+                <option [value]="campanha.id">
+                  {{ campanha.dataInicio | date: 'dd/MM HH:mm' }} — {{ campanha.nichos.join(', ') }} × {{ campanha.cidades.join(', ') }}
+                </option>
+              }
+            </select>
+          </div>
+          <div class="col-md-3 d-flex gap-2">
+            <button type="button" class="btn btn-sm btn-primary flex-fill" (click)="aplicarFiltros()">
+              <i class="fas fa-filter me-1"></i>Filtrar
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-light border-secondary" (click)="limparFiltros()">
+              <i class="fas fa-eraser"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @if (leads().length === 0 && !isLoadingLeads()) {
+      <div class="card empty-leads rounded-3">
+        <div class="card-body text-center py-5">
+          @if (temFiltrosAtivos()) {
+            <div class="empty-leads-icone mb-3"><i class="fas fa-filter"></i></div>
+            <h6 class="fw-bold text-white mb-1">Nenhum lead corresponde aos filtros</h6>
+            <p class="text-secondary small mb-3">Ajuste o nicho, a cidade ou a campanha para ver mais resultados.</p>
+            <button type="button" class="btn btn-sm btn-outline-light border-secondary" (click)="limparFiltros()">
+              <i class="fas fa-eraser me-1"></i>Limpar filtros
+            </button>
+          } @else {
+            <div class="empty-leads-icone mb-3"><i class="fas fa-magnifying-glass-chart"></i></div>
+            <h6 class="fw-bold text-white mb-1">Nenhum lead coletado ainda</h6>
+            <p class="text-secondary small mb-0">Selecione nichos e cidades acima e inicie a primeira campanha de coleta.</p>
+          }
+        </div>
+      </div>
+    } @else {
+      <tm-table
+        [cols]="cols()"
+        [data]="leads()"
+        [paginated]="true"
+        [isLoading]="isLoadingLeads()"
+        [showControls]="true"
+      ></tm-table>
+    }
+  </div>
+</div>
+
+<!-- Templates para as colunas da tm-table -->
+<ng-template #nomeTemplate let-lead>
+  <div class="d-flex align-items-center gap-2 lead-nome">
+    <span class="lead-avatar" [class]="'lead-avatar-' + corAvatar(lead.nome)">{{ iniciais(lead.nome) }}</span>
+    <span class="fw-semibold text-white text-truncate" [title]="lead.nome">{{ lead.nome }}</span>
+  </div>
+</ng-template>
+
+<ng-template #telefoneTemplate let-lead>
+  @if (telefoneParaContato(lead)) {
+    <div class="d-flex align-items-center gap-2">
+      <div class="small flex-grow-1">
+        @if (lead.telefone) {
+          <div class="text-white" [title]="lead.telefone">{{ lead.telefone }}</div>
+        }
+        @if (lead.telefoneNormalizado) {
+          <div class="text-success" [title]="lead.telefoneNormalizado">
+            <i class="fab fa-whatsapp me-1"></i>{{ lead.telefoneNormalizado }}
+          </div>
+        }
+      </div>
+      <button
+        type="button"
+        class="btn-copiar"
+        (click)="copiarTelefone(lead, $event)"
+        [attr.aria-label]="'Copiar telefone de ' + lead.nome"
+        title="Copiar telefone"
+      >
+        <i class="far fa-copy"></i>
+      </button>
+    </div>
+  } @else {
+    <span class="text-muted">—</span>
+  }
+</ng-template>
+
+<ng-template #enderecoTemplate let-lead>
+  @if (lead.endereco) {
+    <span class="text-truncate d-inline-block align-middle lead-endereco text-light" [title]="lead.endereco">
+      {{ lead.endereco }}
+    </span>
+  } @else {
+    <span class="text-muted">—</span>
+  }
+</ng-template>
+
+<ng-template #siteTemplate let-lead>
+  @if (lead.site) {
+    <a
+      class="lead-site text-truncate d-inline-block align-middle"
+      [href]="lead.site"
+      target="_blank"
+      rel="noopener noreferrer"
+      [title]="lead.site"
+      (click)="$event.stopPropagation()"
+    >
+      <i class="fas fa-arrow-up-right-from-square me-1"></i>Site
+    </a>
+  } @else {
+    <span class="text-muted">—</span>
+  }
+</ng-template>
+
+<ng-template #nichoTemplate let-lead>
+  <span class="lead-pill" [title]="lead.nichoBuscado">
+    <i class="fas {{ iconeNicho(lead.nichoBuscado) }}"></i>{{ lead.nichoBuscado }}
+  </span>
+</ng-template>
+
+<!-- Modal de preset (criar/editar) — instanciado via @if para capturar os inputs a cada abertura -->
+@if (showModalPreset()) {
+  <app-preset-modal
+    [modo]="modoPreset()"
+    [nomeInicial]="presetEditando()?.nome ?? ''"
+    [nichosIniciais]="presetEditando()?.nichos ?? nichosSelecionados()"
+    [cidadesIniciais]="presetEditando()?.cidades ?? cidadesSelecionadas()"
+    (salvo)="salvarPreset($event)"
+    (cancelado)="fecharModalPreset()"
+  />
+}
