@@ -266,8 +266,17 @@ export class DisparoMensagensComponent implements OnInit, OnDestroy {
         let items: any[] = [];
         if (Array.isArray(parsed)) {
           items = parsed;
-        } else if (parsed && Array.isArray(parsed.estabelecimentos)) {
-          items = parsed.estabelecimentos;
+        } else if (parsed && typeof parsed === 'object') {
+          if (Array.isArray(parsed.estabelecimentos)) {
+            items = parsed.estabelecimentos;
+          } else {
+            for (const key of Object.keys(parsed)) {
+              if (Array.isArray(parsed[key])) {
+                items = parsed[key];
+                break;
+              }
+            }
+          }
         }
 
         if (items.length === 0) {
