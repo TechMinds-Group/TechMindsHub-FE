@@ -377,7 +377,7 @@
               </button>
             }
             <span class="badge tm-badge-info">
-              Delay Anti-Ban: 30s - 60s
+              Delay Anti-Ban: 3m-5m (Pausa 30m / 5 envios)
             </span>
           </div>
         </div>
@@ -516,7 +516,7 @@
                 <div class="text-secondary small mt-1">
                   @if (contagemRegressivaSegundos() > 0) {
                     <span class="text-warning fw-medium">
-                      <i class="fas fa-shield-alt me-1"></i>Pausa Anti-Ban ativa: próximo envio em <strong>{{ contagemRegressivaSegundos() }}s</strong>
+                      <i class="fas fa-shield-alt me-1"></i>Pausa Anti-Ban ativa: próximo envio em <strong>{{ formatarTempoRegressivo(contagemRegressivaSegundos()) }}</strong>
                     </span>
                   } @else if (executando()) {
                     <span class="text-info fw-medium">
@@ -532,7 +532,7 @@
             <div class="text-end ms-3">
               @if (contagemRegressivaSegundos() > 0) {
                 <span class="badge bg-warning text-dark fs-6 py-2 px-3 shadow-sm border border-warning">
-                  <i class="fas fa-clock me-1 fa-spin"></i>Próximo envio em {{ contagemRegressivaSegundos() }}s
+                  <i class="fas fa-clock me-1 fa-spin"></i>Próximo envio em {{ formatarTempoRegressivo(contagemRegressivaSegundos()) }}
                 </span>
               } @else if (executando()) {
                 <span class="badge bg-info text-dark fs-6 py-2 px-3 shadow-sm border border-info">

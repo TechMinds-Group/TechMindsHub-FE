@@ -636,4 +636,19 @@ export class DisparoMensagensComponent implements OnInit, OnDestroy {
       this.timerInterval = null;
     }
   }
+
+  /**
+   * Formata uma quantidade de segundos em formato amigável de minutos e segundos (ex: "30m 00s" ou "4m 15s").
+   */
+  formatarTempoRegressivo(segundos: number): string {
+    if (segundos <= 0) {
+      return '0s';
+    }
+    const minutos = Math.floor(segundos / 60);
+    const segRestantes = segundos % 60;
+    if (minutos > 0) {
+      return `${minutos}m ${segRestantes.toString().padStart(2, '0')}s`;
+    }
+    return `${segundos}s`;
+  }
 }
