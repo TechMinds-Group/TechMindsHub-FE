@@ -88,13 +88,18 @@ export class DisparoMensagensComponent implements OnInit, OnDestroy {
 
   /**
    * Obtém a sublista de estabelecimentos cadastrados a serem contatados.
-   * Filtra contatos já enviados quando apenasNaoEnviados estiver marcado.
+   * Ignora estritamente contatos com status de falha ou sem WhatsApp, e filtra contatos já enviados quando apenasNaoEnviados estiver ativo.
    */
   readonly contatosSelecionados = computed<Contato[]>(() => {
     let base = this.estabelecimentosBanco();
+
+    // Filtra obrigatoriamente qualquer estabelecimento com status de falha ou sem WhatsApp
+    base = base.filter((c) => !c.falhou && c.temWhatsApp !== false && this.obterStatusEnvio(c) !== 'falha');
+
     if (this.apenasNaoEnviados()) {
-      base = base.filter((c) => !c.enviado && this.obterStatusEnvio(c) !== 'sucesso');
+      base = base.filter((c) => !c.enviado && this.obterStatusEnvio(c) === 'pendente');
     }
+
     const qtd = this.quantidadeSelecionada();
     if (qtd >= base.length) {
       return base;
@@ -103,10 +108,17 @@ export class DisparoMensagensComponent implements OnInit, OnDestroy {
   });
 
   /**
-   * Quantidade de estabelecimentos no banco que já foram contatados anteriormente.
+   * Quantidade de estabelecimentos no banco que já foram contatados com sucesso anteriormente.
    */
   readonly totalIgnoradosPorJaEnviados = computed<number>(() => {
     return this.estabelecimentosBanco().filter((c) => c.enviado || this.obterStatusEnvio(c) === 'sucesso').length;
+  });
+
+  /**
+   * Quantidade de estabelecimentos no banco marcados com falha ou sem WhatsApp.
+   */
+  readonly totalIgnoradosPorFalha = computed<number>(() => {
+    return this.estabelecimentosBanco().filter((c) => c.falhou || c.temWhatsApp === false || this.obterStatusEnvio(c) === 'falha').length;
   });
 
   /**

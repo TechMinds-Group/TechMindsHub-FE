@@ -239,6 +239,13 @@
               <span>Filtro Ativo: <strong>{{ totalIgnoradosPorJaEnviados() }}</strong> contato(s) já enviados serão ignorados.</span>
             </div>
           }
+
+          @if (totalIgnoradosPorFalha() > 0) {
+            <div class="mt-2 p-2 rounded bg-danger-subtle border border-danger text-danger small d-flex align-items-center">
+              <i class="fas fa-ban me-2 fs-6"></i>
+              <span>Proteção Anti-Falha: <strong>{{ totalIgnoradosPorFalha() }}</strong> contato(s) com status de Falha/Inválido serão ignorados no envio.</span>
+            </div>
+          }
         </div>
 
         <!-- Editor de 3 Templates da Mensagem (Persistência no Banco de Dados) -->
