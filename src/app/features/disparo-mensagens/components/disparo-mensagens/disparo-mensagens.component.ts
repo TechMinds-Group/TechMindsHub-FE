@@ -80,6 +80,12 @@ export class DisparoMensagensComponent implements OnInit, OnDestroy {
             })
           );
         }
+
+        // Se o disparo em segundo plano atingiu o último contato do lote e o delay é 0, conclui a execução no frontend
+        if (prog.indiceAtual === prog.totalContatos && (prog.delayProximoSegundos || 0) === 0) {
+          this.executando.set(false);
+          this.carregarEstabelecimentosDoBanco();
+        }
       }
     });
   }
@@ -578,10 +584,10 @@ export class DisparoMensagensComponent implements OnInit, OnDestroy {
     };
 
     this.mensagensApi.enviarLote(payload, this.instanceName).subscribe({
-      next: (relatorio) => {
-        this.relatorioConsolidado.set(relatorio);
-        this.executando.set(false);
-        this.carregarEstabelecimentosDoBanco();
+      next: (relatorioInicial) => {
+        // Disparo em lote iniciado com sucesso em segundo plano no backend.
+        // O acompanhamento e contagem regressiva continuam em tempo real via WebSocket SignalR.
+        this.erroEnvio.set(null);
       },
       error: (err) => {
         console.error('Erro ao disparar mensagens em lote:', err);
