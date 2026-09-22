@@ -66,12 +66,19 @@ export class DisparoMensagensComponent implements OnInit, OnDestroy {
             return novoMapa;
           });
 
-          // Atualizar também a flag de enviado na lista local de estabelecimentos do banco
-          if (prog.sucesso) {
-            this.estabelecimentosBanco.update((lista) =>
-              lista.map((item) => (item.numero === prog.numeroSanitizado ? { ...item, enviado: true } : item))
-            );
-          }
+          // Atualizar também a lista local de estabelecimentos do banco
+          this.estabelecimentosBanco.update((lista) =>
+            lista.map((item) => {
+              if (item.numero === prog.numeroSanitizado) {
+                if (prog.sucesso) {
+                  return { ...item, enviado: true, falhou: false, temWhatsApp: true };
+                } else {
+                  return { ...item, enviado: false, falhou: true };
+                }
+              }
+              return item;
+            })
+          );
         }
       }
     });
@@ -506,6 +513,9 @@ export class DisparoMensagensComponent implements OnInit, OnDestroy {
     }
     if (contato.enviado) {
       return 'sucesso';
+    }
+    if (contato.falhou || contato.temWhatsApp === false) {
+      return 'falha';
     }
     return 'pendente';
   }

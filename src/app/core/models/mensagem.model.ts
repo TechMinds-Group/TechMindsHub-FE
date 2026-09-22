@@ -9,6 +9,7 @@ export interface Contato {
   cidadeBuscada?: string;
   temWhatsApp?: boolean;
   enviado?: boolean;
+  falhou?: boolean;
   dataEnvio?: string;
 }
 
