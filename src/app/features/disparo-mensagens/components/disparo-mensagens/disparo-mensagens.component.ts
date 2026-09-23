@@ -44,6 +44,7 @@ export class DisparoMensagensComponent implements OnInit, OnDestroy {
   readonly mensagemSucessoTemplates = signal<string | null>(null);
   readonly mensagemErroTemplates = signal<string | null>(null);
 
+  readonly cancelando = signal<boolean>(false);
   readonly executando = signal<boolean>(false);
   readonly relatorioConsolidado = signal<EnviarLoteResponse | null>(null);
   readonly erroEnvio = signal<string | null>(null);
@@ -56,6 +57,15 @@ export class DisparoMensagensComponent implements OnInit, OnDestroy {
     effect(() => {
       const prog = this.hubService.progressoAtual();
       if (prog) {
+        if (prog.mensagemLog?.includes('[CANCELADO]') || prog.nomeContato === 'CANCELADO PELO USUÁRIO') {
+          this.executando.set(false);
+          this.cancelando.set(false);
+          this.limparTimer();
+          this.contagemRegressivaSegundos.set(0);
+          this.carregarEstabelecimentosDoBanco();
+          return;
+        }
+
         this.iniciarContagemRegressiva(prog.delayProximoSegundos || 0);
 
         if (prog.numeroSanitizado) {
@@ -593,6 +603,34 @@ export class DisparoMensagensComponent implements OnInit, OnDestroy {
         console.error('Erro ao disparar mensagens em lote:', err);
         this.erroEnvio.set(err.error?.mensagem || 'Falha ao se comunicar com o servidor de disparo.');
         this.executando.set(false);
+      }
+    });
+  }
+
+  /**
+   * Interrompe e cancela imediatamente qualquer disparo em lote ativo na instância.
+   */
+  cancelarDisparo(): void {
+    if (!this.executando() && this.contagemRegressivaSegundos() === 0) {
+      return;
+    }
+
+    this.cancelando.set(true);
+    this.mensagensApi.cancelarLote(this.instanceName).subscribe({
+      next: () => {
+        this.cancelando.set(false);
+        this.executando.set(false);
+        this.limparTimer();
+        this.contagemRegressivaSegundos.set(0);
+        this.erroEnvio.set(null);
+        this.carregarEstabelecimentosDoBanco();
+      },
+      error: (err) => {
+        console.error('Erro ao cancelar disparo em lote:', err);
+        this.cancelando.set(false);
+        this.executando.set(false);
+        this.limparTimer();
+        this.contagemRegressivaSegundos.set(0);
       }
     });
   }

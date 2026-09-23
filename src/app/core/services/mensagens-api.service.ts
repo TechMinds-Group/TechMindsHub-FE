@@ -31,6 +31,14 @@ export class MensagensApiService {
   }
 
   /**
+   * Solicita o cancelamento imediato do disparo em lote em andamento.
+   */
+  cancelarLote(instanceName?: string): Observable<{ mensagem: string }> {
+    const url = instanceName ? `${this.baseUrl}/cancelar-lote?instanceName=${encodeURIComponent(instanceName)}` : `${this.baseUrl}/cancelar-lote`;
+    return this.http.post<{ mensagem: string }>(url, {});
+  }
+
+  /**
    * Consulta o status da conexão da instância no WhatsApp.
    */
   obterStatusWhatsApp(instanceName?: string): Observable<StatusConexao> {
